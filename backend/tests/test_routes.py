@@ -12,8 +12,10 @@ from server import app
 class TestRoutes(unittest.TestCase):
     def setUp(self):
         """Set up test database and client."""
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config.clear()
         app.config['TESTING'] = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         self.app = app
         self.client = app.test_client()
         self.ctx = app.app_context()

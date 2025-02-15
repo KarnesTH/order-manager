@@ -32,6 +32,11 @@ jobs:
           cd backend
           ruff check .
 
+      - name: Set up test enviroment
+        run: |
+          cd backend
+          mkdir -p instance
+
       - name: Test with unittest
         run: |
           cd backend
