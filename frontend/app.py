@@ -19,7 +19,13 @@ class ProductsTab(QWidget):
 
         self.table = QTableWidget()
         self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels(['ID', 'Name', 'Brand', 'Price', 'Stock'])
+        self.table.setHorizontalHeaderLabels([
+            'ID',
+            'Name',
+            'Brand',
+            'Price',
+            'Stock'
+        ])
 
         self.load_products(products)
 
@@ -46,7 +52,13 @@ class OrdersTab(QWidget):
 
         self.table = QTableWidget()
         self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels(['ID', 'Product', 'Quantity', 'Customer', 'Date'])
+        self.table.setHorizontalHeaderLabels([
+            'ID',
+            'Product',
+            'Quantity',
+            'Customer',
+            'Date'
+        ])
 
         layout = QVBoxLayout()
         layout.addWidget(self.table)
