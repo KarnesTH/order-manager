@@ -1,0 +1,15 @@
+{
+  "include": [".", "backend"],
+  "exclude": ["**/node_modules", "**/__pycache__"],
+  "ignore": ["**/node_modules"],
+  "defineConstant": {
+    "DEBUG": true
+  },
+  "venvPath": ".",
+  "venv": "env",
+  "extraPaths": ["env/lib/python3.13/site-packages"],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.13.1",
+  "pythonPlatform": "Linux"
+}
