@@ -9,7 +9,7 @@ bp = Blueprint('api', __name__)
 
 # Routes for products
 @bp.route('/products', methods=['GET'])
-def get_products():
+def get_products() -> ResponseReturnValue:
     """
     Get all products.
 
@@ -38,7 +38,7 @@ def get_products():
         }, HTTPStatus.INTERNAL_SERVER_ERROR)
 
 @bp.route('/products', methods=['POST'])
-def create_product():
+def create_product() -> ResponseReturnValue:
     """
     Create a new product.
 
@@ -77,7 +77,7 @@ def create_product():
         }, HTTPStatus.INTERNAL_SERVER_ERROR)
 
 @bp.route('/products/<int:product_id>', methods=['PUT'])
-def update_product(product_id: int):
+def update_product(product_id: int) -> ResponseReturnValue:
     """
     Update a product.
 
@@ -96,7 +96,7 @@ def update_product(product_id: int):
 
         validate_request_data(data, ['name', 'brand', 'price', 'stock'])
 
-        product = Product.query.get(product_id)
+        product = db.session.get(Product, product_id)
         if not product:
             raise ValueError(f"Product with ID {product_id} not found")
 
@@ -118,7 +118,7 @@ def update_product(product_id: int):
         }, HTTPStatus.INTERNAL_SERVER_ERROR)
 
 @bp.route('/products/<int:product_id>', methods=['DELETE'])
-def delete_product(product_id: int):
+def delete_product(product_id: int) -> ResponseReturnValue:
     """
     Delete a product.
 
@@ -132,7 +132,7 @@ def delete_product(product_id: int):
         Exception: If an error occurs while deleting the product.
     """
     try:
-        product = Product.query.get(product_id)
+        product = db.session.get(Product, product_id)
         if not product:
             raise ValueError(f"Product with ID {product_id} not found")
 
@@ -153,7 +153,7 @@ def delete_product(product_id: int):
 
 # Routes for orders
 @bp.route('/orders', methods=['GET'])
-def get_orders():
+def get_orders() -> ResponseReturnValue:
     """
     Get all orders.
 
@@ -180,7 +180,7 @@ def get_orders():
         }, HTTPStatus.INTERNAL_SERVER_ERROR)
 
 @bp.route('/orders', methods=['POST'])
-def create_order():
+def create_order() -> ResponseReturnValue:
     """
     Create a new order.
 
@@ -202,7 +202,7 @@ def create_order():
         if data.get('quantity', 0) <= 0:
             raise ValueError("Quantity must be greater than 0")
 
-        product = Product.query.get(data['product_id'])
+        product = db.session.get(Product, data['product_id'])
         if not product:
             raise ValueError(f"Product with ID {data['product_id']} not found")
         if product.stock < data['quantity']:
@@ -232,7 +232,7 @@ def create_order():
         }, HTTPStatus.INTERNAL_SERVER_ERROR)
 
 @bp.route('/orders/<int:order_id>', methods=['PUT'])
-def update_order(order_id: int):
+def update_order(order_id: int) -> ResponseReturnValue:
     """
     Update an order.
 
@@ -254,7 +254,7 @@ def update_order(order_id: int):
             ['product_id', 'quantity', 'customer', 'order_date']
         )
 
-        order = Order.query.get(order_id)
+        order = db.session.get(Order, order_id)
         if not order:
             raise ValueError(f"Order with ID {order_id} not found")
 
@@ -276,7 +276,7 @@ def update_order(order_id: int):
         }, HTTPStatus.INTERNAL_SERVER_ERROR)
 
 @bp.route('/orders/<int:order_id>', methods=['DELETE'])
-def delete_order(order_id: int):
+def delete_order(order_id: int) -> ResponseReturnValue:
     """
     Delete an order.
 
@@ -290,13 +290,13 @@ def delete_order(order_id: int):
         Exception: If an error occurs while deleting the order.
     """
     try:
-        order = Order.query.get(order_id)
+        order = db.session.get(Order, order_id)
         if not order:
             raise ValueError(f"Order with ID {order_id} not found")
 
         db.session.delete(order)
 
-        product = Product.query.get(order.product_id)
+        product = db.session.get(Product, order.product_id)
 
         if product is not None:
             product.stock += order.quantity
