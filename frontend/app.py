@@ -1,6 +1,6 @@
 import sys
 
-from api import get_products
+from api import get_orders, get_products
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTabWidget
 from ui.tabs import OrdersTab, ProductsTab
 
@@ -20,9 +20,10 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.tabs)
 
         products = get_products()
+        orders = get_orders()
 
         self.products_tab = ProductsTab(products)
-        self.orders_tab = OrdersTab()
+        self.orders_tab = OrdersTab(orders)
 
         self.tabs.addTab(self.products_tab, "Products")
         self.tabs.addTab(self.orders_tab, "Orders")

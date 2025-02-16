@@ -17,6 +17,10 @@ class ActionButtonDelegate(QStyledItemDelegate):
     edit_clicked = Signal(int)
     delete_clicked = Signal(int)
 
+    def __init__(self, parent=None, type="product"):
+        super().__init__(parent)
+        self.type = type
+
     def createEditor(
         self,
         parent: Optional[QWidget],
@@ -37,9 +41,15 @@ class ActionButtonDelegate(QStyledItemDelegate):
         delete_btn.setToolTip("Delete product")
         delete_btn.setFixedWidth(40)
 
-        product_id = index.model().products[index.row()]["id"]
-        edit_btn.clicked.connect(lambda: self.edit_clicked.emit(product_id))
-        delete_btn.clicked.connect(lambda: self.delete_clicked.emit(product_id))
+        item_id = 0
+
+        if self.type == "product":
+            item_id = index.model().products[index.row()]["id"]
+        elif self.type == "order":
+            item_id = index.model().orders[index.row()]["id"]
+
+        edit_btn.clicked.connect(lambda: self.edit_clicked.emit(item_id))
+        delete_btn.clicked.connect(lambda: self.delete_clicked.emit(item_id))
 
         layout.addWidget(edit_btn)
         layout.addWidget(delete_btn)
