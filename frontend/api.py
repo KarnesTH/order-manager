@@ -16,7 +16,7 @@ def create_product(product: Dict[str, Any]) -> Dict[str, Any]:
     """Create a product."""
     try:
         response = requests.post(f'{API_URL}/products', json=product)
-        return response.json() if response.status_code == 200 else {}
+        return response.json() if response.status_code == 201 else {}
     except Exception as e:
         return { "message": str(e) }
 
@@ -48,7 +48,7 @@ def create_order(order: Dict[str, Any]) -> Dict[str, Any]:
     """Create an order."""
     try:
         response = requests.post(f'{API_URL}/orders', json=order)
-        return response.json() if response.status_code == 200 else {}
+        return response.json() if response.status_code == 201 else {}
     except Exception as e:
         return { "message": str(e) }
 

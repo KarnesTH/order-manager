@@ -3,7 +3,6 @@ import sys
 from api import get_products
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTabWidget
 from ui.tabs import OrdersTab, ProductsTab
-from ui.messages import show_error
 
 
 class MainWindow(QMainWindow):

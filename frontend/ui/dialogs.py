@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from PyQt6.QtWidgets import (
     QComboBox,
@@ -13,10 +13,16 @@ from PyQt6.QtWidgets import (
 
 class AddProductDialog(QDialog):
     """Dialog for adding a new product."""
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, product: Optional[Dict[str, Any]] = None):
         super().__init__(parent)
-        self.setWindowTitle("Add Product")
+        self.setWindowTitle("Edit Product" if product else "Add Product")
         self.setup_ui()
+
+        if product:
+            self.name_input.setText(product['name'])
+            self.brand_input.setText(product['brand'])
+            self.price_input.setText(str(product['price']))
+            self.stock_input.setText(str(product['stock']))
 
     def setup_ui(self):
         """Setup the dialog UI."""
