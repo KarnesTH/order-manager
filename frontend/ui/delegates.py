@@ -1,14 +1,9 @@
-from typing import Any, Optional
 
-from PyQt6.QtCore import QSize
+from PyQt6.QtCore import QEvent, QRect, QSize
 from PyQt6.QtCore import pyqtSignal as Signal
-from PyQt6.QtGui import QIcon, QPainter
+from PyQt6.QtGui import QIcon, QMouseEvent
 from PyQt6.QtWidgets import (
-    QHBoxLayout,
-    QPushButton,
     QStyledItemDelegate,
-    QStyleOptionViewItem,
-    QWidget,
 )
 
 
@@ -20,61 +15,88 @@ class ActionButtonDelegate(QStyledItemDelegate):
     def __init__(self, parent=None, type="product"):
         super().__init__(parent)
         self.type = type
-
-    def createEditor(
-        self,
-        parent: Optional[QWidget],
-        option: Any,
-        index: Any
-    ) -> QWidget:
-        editor = QWidget(parent)
-        layout = QHBoxLayout(editor)
-        layout.setContentsMargins(4, 4, 4, 4)
-
-        edit_btn = QPushButton(editor)
-        edit_btn.setIcon(QIcon.fromTheme("document-edit"))
-        edit_btn.setToolTip("Edit product")
-        edit_btn.setFixedWidth(40)
-
-        delete_btn = QPushButton(editor)
-        delete_btn.setIcon(QIcon.fromTheme("edit-delete"))
-        delete_btn.setToolTip("Delete product")
-        delete_btn.setFixedWidth(40)
-
-        item_id = 0
-
-        if self.type == "product":
-            item_id = index.model().products[index.row()]["id"]
-        elif self.type == "order":
-            item_id = index.model().orders[index.row()]["id"]
-
-        edit_btn.clicked.connect(lambda: self.edit_clicked.emit(item_id))
-        delete_btn.clicked.connect(lambda: self.delete_clicked.emit(item_id))
-
-        layout.addWidget(edit_btn)
-        layout.addWidget(delete_btn)
-
-        editor.setLayout(layout)
-        return editor
-
-    def setEditorData(self, editor: Optional[QWidget], index: Any) -> None:
-        pass
-
-    def setModelData(
-        self,
-        editor: Optional[QWidget],
-        model: Any,
-        index: Any
-    ) -> None:
-        pass
-
-    def sizeHint(self, option: 'QStyleOptionViewItem', index: Any) -> QSize:
-        return QSize(100, 40)
+        self.edit_btn_rects = {}
+        self.delete_btn_rects = {}
 
     def paint(
         self,
-        painter: Optional[QPainter],
-        option: QStyleOptionViewItem,
-        index: Any
-    ) -> None:
+        painter,
+        option,
+        index
+    ):
+        """Paint the action buttons."""
+        if painter is None:
+            return
+
         super().paint(painter, option, index)
+
+        rect = option.rect
+        btn_width = 40
+        padding = 4
+        icon_size = 16
+
+        edit_rect = QRect(
+            rect.x() + padding,
+            rect.y() + padding,
+            btn_width,
+            rect.height() - 2 * padding
+        )
+
+        delete_rect = QRect(
+            edit_rect.right() + padding,
+            rect.y() + padding,
+            btn_width,
+            rect.height() - 2 * padding
+        )
+
+        row = index.row()
+        self.edit_btn_rects[row] = edit_rect
+        self.delete_btn_rects[row] = delete_rect
+
+        edit_icon_x = edit_rect.x() + (btn_width - icon_size) // 2
+        edit_icon_y = edit_rect.y() + (edit_rect.height() - icon_size) // 2
+        delete_icon_x = delete_rect.x() + (btn_width - icon_size) // 2
+        delete_icon_y = delete_rect.y() + (delete_rect.height() - icon_size) // 2
+
+        painter.drawPixmap(
+            edit_icon_x, edit_icon_y, icon_size, icon_size,
+            QIcon.fromTheme("document-edit").pixmap(QSize(icon_size, icon_size))
+        )
+        painter.drawPixmap(
+            delete_icon_x, delete_icon_y, icon_size, icon_size,
+            QIcon.fromTheme("edit-delete").pixmap(QSize(icon_size, icon_size))
+        )
+
+    def editorEvent(self, event, model, option, index):
+        """Handle editor events."""
+        if event is None:
+            return False
+
+        if (isinstance(event, QMouseEvent) and
+            event.type() == QEvent.Type.MouseButtonRelease
+        ):
+            row = index.row()
+            pos = event.position().toPoint()
+
+            if (row in self.edit_btn_rects and
+                self.edit_btn_rects[row].contains(pos)
+            ):
+                item_id = self._get_item_id(index)
+                self.edit_clicked.emit(item_id)
+                return True
+
+            if (row in self.delete_btn_rects and
+                self.delete_btn_rects[row].contains(pos)
+            ):
+                item_id = self._get_item_id(index)
+                self.delete_clicked.emit(item_id)
+                return True
+
+        return False
+
+    def _get_item_id(self, index):
+        """Get the item ID."""
+        if self.type == "product":
+            return index.model().products[index.row()]["id"]
+        elif self.type == "order":
+            return index.model().orders[index.row()]["id"]

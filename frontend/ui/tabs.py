@@ -10,7 +10,7 @@ from api import (
     update_order,
     update_product,
 )
-from PyQt6.QtCore import QSize, QTimer
+from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import (
     QHBoxLayout,
@@ -80,9 +80,6 @@ class ProductsTab(QWidget):
         self.action_delegate.delete_clicked.connect(self.delete_product)
         self.table.setItemDelegateForColumn(5, self.action_delegate)
 
-        for row in range(self.model.rowCount()):
-            self.table.edit(self.model.index(row, 5))
-
         header = self.table.horizontalHeader()
         if header:
             header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -101,12 +98,6 @@ class ProductsTab(QWidget):
         self.action_delegate.edit_clicked.connect(self.edit_product)
         self.action_delegate.delete_clicked.connect(self.delete_product)
         self.table.setItemDelegateForColumn(5, self.action_delegate)
-
-        def init_editors():
-            for row in range(self.model.rowCount()):
-                self.table.edit(self.model.index(row, 5))
-
-        QTimer.singleShot(100, init_editors)
 
     def add_product(self):
         """Open dialog to add a new product."""
@@ -219,9 +210,6 @@ class OrdersTab(QWidget):
         self.action_delegate.delete_clicked.connect(self.delete_order)
         self.table.setItemDelegateForColumn(6, self.action_delegate)
 
-        for row in range(self.model.rowCount()):
-            self.table.edit(self.model.index(row, 6))
-
         header = self.table.horizontalHeader()
         if header:
             header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -240,12 +228,6 @@ class OrdersTab(QWidget):
         self.action_delegate.edit_clicked.connect(self.edit_order)
         self.action_delegate.delete_clicked.connect(self.delete_order)
         self.table.setItemDelegateForColumn(6, self.action_delegate)
-
-        def init_editors():
-            for row in range(self.model.rowCount()):
-                self.table.edit(self.model.index(row, 6))
-
-        QTimer.singleShot(100, init_editors)
 
     def add_order(self):
         """Open dialog to add a new order."""
@@ -285,11 +267,16 @@ class OrdersTab(QWidget):
     def edit_order(self, order_id: int):
         """Open dialog to edit a product."""
         orders = get_orders()
+        products = get_products()
         order = next((o for o in orders if o['id'] == order_id), None)
         if order:
-            dialog = AddProductDialog(self, order)
+            dialog = AddOrderDialog(products, self)
 
-            if dialog.exec() == AddProductDialog.DialogCode.Accepted:
+            dialog.quantity_input.setText(str(order['quantity']))
+            dialog.customer_input.setText(order['customer'])
+            dialog.date_input.setText(order['order_date'])
+
+            if dialog.exec() == AddOrderDialog.DialogCode.Accepted:
                 try:
                     data = dialog.get_data()
                     response = update_order(order_id, data)
